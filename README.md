@@ -1,153 +1,59 @@
 AuraFX
 
-License: MIT
-Framework: Angular 21 + TypeScript
-Deployment: Vercel / Static Hosting
+License Angular TypeScript Vercel
 
-A high-performance Forex Exchange Rates & Currency Analytics platform built with Angular. Monitor real-time currency exchange rates, perform multi-currency conversions, visualize historical trends, and gain advanced market insights—all with a sleek, responsive UI.
+A high-performance forex analytics platform built with Angular, designed to provide real-time currency exchange rates, multi-currency conversion, historical data charts, and advanced market insights with a sleek, responsive UI.
 
 📂 Project Structure
-src/app/components       → Modular UI architecture
-src/app/services         → Business logic and API management
-src/app/models           → TypeScript interfaces
-src/app/pages            → Core views (Dashboard, Converter, Rates, Charts)
-src/assets/i18n          → Multi-language support (EN, ES, FR)
-public/                  → Public assets (logos, favicons)
+/Frontend → Angular SPA
+
+Standalone components with OnPush change detection
+
+Signal-based reactive state management
+/src/app/components → Modular UI
+
+Dashboard, Currency Converter, Rates Table, Currency Charts
+/src/app/services → Business logic & API integration
+/src/app/models → TypeScript interfaces
+/src/assets/i18n → Multi-language support (EN, ES, FR)
+/public → Public assets (logo, favicon)
 
 🚀 Features
-Dashboard
 
-Real-time currency exchange rates
+Dashboard → Real-time rates, top gainers/losers, market analytics
 
-Market overview (top gainers/losers)
+Currency Converter → Single/multi conversion, historical rates, favorites
 
-Analytics cards with trends
+Exchange Rates Table → Filter, search, sort, export CSV/JSON
 
-Base currency selector
+Currency Charts → Line, bar, area charts, multi-currency comparison
 
-Auto-refresh and manual update
+Navigation → Theme toggle (Dark/Light), language selector, responsive menu
 
-Currency Converter
-
-Single & multi-currency conversion
-
-Historical conversion support
-
-Favorite currencies & conversion history
-
-Input validation and instant feedback
-
-Exchange Rates Table
-
-Comprehensive currency list
-
-Advanced filtering, sorting, and pagination
-
-Export as CSV/JSON
-
-Favorites & comparison tools
-
-Currency Charts
-
-Line, bar, and area charts
-
-Multi-currency overlays
-
-Technical indicators (MA, EMA)
-
-Export charts as PNG
-
-Navigation
-
-Route navigation with active state
-
-Theme toggle (Dark/Light)
-
-Language selector (EN, ES, FR)
-
-Responsive mobile menu
-
-Market Overview
-
-Currency strength indices
-
-Top gainers & losers
-
-Visual performance metrics
+Market Overview → Currency strength, top movers, visual metrics
 
 🛠️ Tech Stack
 
-Angular 21 (Standalone Components, Signals)
-
-TypeScript 5.9 (Strict mode)
-
-SCSS & BEM methodology for styling
-
-Angular Material & CDK
-
-Chart.js / ng2-charts for data visualization
-
-RxJS for reactive data flow
-
-@ngx-translate/core for i18n
-
-Vitest + jsdom for testing
+Frontend: Angular 21, TypeScript 5.9, SCSS, Angular Material, RxJS, Chart.js / ng2-charts, @ngx-translate/core
+Utilities: Vitest + jsdom (testing), Prettier (formatting), Responsive grid system
 
 📦 Getting Started
+1️⃣ Clone the repository
+
 git clone https://github.com/MOU-SOLUTIONS/aurafx.git
 cd aurafx
+
+
+2️⃣ Install dependencies
+
 npm install
-npm start        # Run dev server on port 4200
-npm run build    # Production build
 
-🌍 Internationalization
 
-Supported languages: English, Spanish, French
+3️⃣ Run development server
 
-Reactive translation updates using signals
+npm start  # Default port 4200
 
-Browser language detection & LocalStorage persistence
 
-⚡ Performance Optimizations
+4️⃣ Build for production
 
-OnPush change detection + signal-based state
-
-Lazy-loaded routes and standalone components
-
-API & translation caching (5 min TTL)
-
-Input debouncing, minimal DOM re-rendering
-
-Tree-shaking, minification, Gzip/Brotli compression
-
-🔐 Security
-
-Input validation & sanitization
-
-XSS prevention & safe HTML bindings
-
-User-friendly error handling
-
-LocalStorage validation
-
-🧩 Future Enhancements
-
-User accounts & personalized dashboards
-
-Advanced analytics & alerts
-
-Social sharing & community features
-
-Mobile apps & offline support
-
-Real-time WebSocket updates & GraphQL API
-
-Additional languages & RTL support
-
-✅ Conclusion
-
-AuraFX is a modern, scalable, and secure forex analytics platform, combining real-time data, historical insights, and advanced analytics in a high-performance Angular application with a responsive and internationalized interface.
-
-Last Updated: 2025-12-27
-Maintained By: Mohamed Dhaoui
-License: MIT (see LICENSE file)
+npm run build  # Output in dist/
