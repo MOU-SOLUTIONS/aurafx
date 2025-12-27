@@ -1,59 +1,34 @@
-AuraFX
+Alpha Vault
+License Java Angular MySQL Build
 
-License Angular TypeScript Vercel
-
-A high-performance forex analytics platform built with Angular, designed to provide real-time currency exchange rates, multi-currency conversion, historical data charts, and advanced market insights with a sleek, responsive UI.
+A full-stack personal finance platform built with Spring Boot (Java) and Angular, designed for tracking income, expenses, budgets, savings, debts, and investments — with powerful analytics and responsive UI.
 
 📂 Project Structure
-/Frontend → Angular SPA
-
-Standalone components with OnPush change detection
-
-Signal-based reactive state management
-/src/app/components → Modular UI
-
-Dashboard, Currency Converter, Rates Table, Currency Charts
-/src/app/services → Business logic & API integration
-/src/app/models → TypeScript interfaces
-/src/assets/i18n → Multi-language support (EN, ES, FR)
-/public → Public assets (logo, favicon)
-
+/Backend → Spring Boot REST API
+Modules: Income, Expense, Budget, Saving Goal, Debt (with payment history), Investment
+JWT authentication (pre-wired), analytics endpoints (daily, weekly, monthly, yearly)
+MySQL database integration
+/Frontend → Angular single-page application
+Responsive dashboard with charts, tables, and filters
+SEO-ready components, Bootstrap grid system
+Parent→child data flow with OnPush change detection
 🚀 Features
-
-Dashboard → Real-time rates, top gainers/losers, market analytics
-
-Currency Converter → Single/multi conversion, historical rates, favorites
-
-Exchange Rates Table → Filter, search, sort, export CSV/JSON
-
-Currency Charts → Line, bar, area charts, multi-currency comparison
-
-Navigation → Theme toggle (Dark/Light), language selector, responsive menu
-
-Market Overview → Currency strength, top movers, visual metrics
-
+Authentication → JWT-based secure login
+Income & Expense Tracking → CRUD + analytics
+Budgeting → Monthly budgets by category with remaining balance tracking
+Saving Goals → Progress bars, deadlines, priority indicators
+Debt Management → Track remaining amounts, due dates, interest
+Investments → Manual + dynamic (crypto, stocks, etc.)
+Analytics → Chart-ready data (category breakdowns, payment methods, top 5 lists)
 🛠️ Tech Stack
+Backend:
 
-Frontend: Angular 21, TypeScript 5.9, SCSS, Angular Material, RxJS, Chart.js / ng2-charts, @ngx-translate/core
-Utilities: Vitest + jsdom (testing), Prettier (formatting), Responsive grid system
-
+Java 17, Spring Boot, Spring Data JPA, MySQL, JWT Security
+Frontend:
+Angular, RxJS, Bootstrap, Chart.js
 📦 Getting Started
+Follow these steps to run Alpha Vault locally:
+
 1️⃣ Clone the repository
-
-git clone https://github.com/MOU-SOLUTIONS/aurafx.git
-cd aurafx
-
-
-2️⃣ Install dependencies
-
-npm install
-
-
-3️⃣ Run development server
-
-npm start  # Default port 4200
-
-
-4️⃣ Build for production
-
-npm run build  # Output in dist/
+git clone https://github.com/MOU-SOLUTIONS/Alpha-vault.git
+cd Alpha-vault
