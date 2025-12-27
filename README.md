@@ -1,61 +1,153 @@
-# AuraFX
+AuraFX
 
-Angular application focused on performance, scalability, and clean architecture.
+License: MIT
+Framework: Angular 21 + TypeScript
+Deployment: Vercel / Static Hosting
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+A high-performance Forex Exchange Rates & Currency Analytics platform built with Angular. Monitor real-time currency exchange rates, perform multi-currency conversions, visualize historical trends, and gain advanced market insights—all with a sleek, responsive UI.
 
-## Development server
+📂 Project Structure
+src/app/components       → Modular UI architecture
+src/app/services         → Business logic and API management
+src/app/models           → TypeScript interfaces
+src/app/pages            → Core views (Dashboard, Converter, Rates, Charts)
+src/assets/i18n          → Multi-language support (EN, ES, FR)
+public/                  → Public assets (logos, favicons)
 
-To start a local development server, run:
+🚀 Features
+Dashboard
 
-```bash
-ng serve
-```
+Real-time currency exchange rates
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Market overview (top gainers/losers)
 
-## Code scaffolding
+Analytics cards with trends
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Base currency selector
 
-```bash
-ng generate component component-name
-```
+Auto-refresh and manual update
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Currency Converter
 
-```bash
-ng generate --help
-```
+Single & multi-currency conversion
 
-## Building
+Historical conversion support
 
-To build the project run:
+Favorite currencies & conversion history
 
-```bash
-ng build
-```
+Input validation and instant feedback
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Exchange Rates Table
 
-## Running unit tests
+Comprehensive currency list
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Advanced filtering, sorting, and pagination
 
-```bash
-ng test
-```
+Export as CSV/JSON
 
-## Running end-to-end tests
+Favorites & comparison tools
 
-For end-to-end (e2e) testing, run:
+Currency Charts
 
-```bash
-ng e2e
-```
+Line, bar, and area charts
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Multi-currency overlays
 
-## Additional Resources
+Technical indicators (MA, EMA)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Export charts as PNG
+
+Navigation
+
+Route navigation with active state
+
+Theme toggle (Dark/Light)
+
+Language selector (EN, ES, FR)
+
+Responsive mobile menu
+
+Market Overview
+
+Currency strength indices
+
+Top gainers & losers
+
+Visual performance metrics
+
+🛠️ Tech Stack
+
+Angular 21 (Standalone Components, Signals)
+
+TypeScript 5.9 (Strict mode)
+
+SCSS & BEM methodology for styling
+
+Angular Material & CDK
+
+Chart.js / ng2-charts for data visualization
+
+RxJS for reactive data flow
+
+@ngx-translate/core for i18n
+
+Vitest + jsdom for testing
+
+📦 Getting Started
+git clone https://github.com/MOU-SOLUTIONS/aurafx.git
+cd aurafx
+npm install
+npm start        # Run dev server on port 4200
+npm run build    # Production build
+
+🌍 Internationalization
+
+Supported languages: English, Spanish, French
+
+Reactive translation updates using signals
+
+Browser language detection & LocalStorage persistence
+
+⚡ Performance Optimizations
+
+OnPush change detection + signal-based state
+
+Lazy-loaded routes and standalone components
+
+API & translation caching (5 min TTL)
+
+Input debouncing, minimal DOM re-rendering
+
+Tree-shaking, minification, Gzip/Brotli compression
+
+🔐 Security
+
+Input validation & sanitization
+
+XSS prevention & safe HTML bindings
+
+User-friendly error handling
+
+LocalStorage validation
+
+🧩 Future Enhancements
+
+User accounts & personalized dashboards
+
+Advanced analytics & alerts
+
+Social sharing & community features
+
+Mobile apps & offline support
+
+Real-time WebSocket updates & GraphQL API
+
+Additional languages & RTL support
+
+✅ Conclusion
+
+AuraFX is a modern, scalable, and secure forex analytics platform, combining real-time data, historical insights, and advanced analytics in a high-performance Angular application with a responsive and internationalized interface.
+
+Last Updated: 2025-12-27
+Maintained By: Mohamed Dhaoui
+License: MIT (see LICENSE file)
