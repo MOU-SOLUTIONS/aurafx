@@ -1,0 +1,131 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<main class="market-overview" role="main" [attr.aria-label]="translation.translate('market.title')">
+  
+  <header class="overview-header">
+    <div class="header-content">
+      <h1 class="overview-title">{{ translation.translate('market.title') }}</h1>
+      <p class="overview-subtitle">{{ translation.translate('market.strengthIndex') }}</p>
+    </div>
+    <button 
+      class="refresh-btn" 
+      (click)="loadMarketData()" 
+      type="button"
+      [attr.aria-label]="translation.translate('common.refresh')"
+      [disabled]="loading()"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+        <path d="M21 3v5h-5"></path>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+        <path d="M3 21v-5h5"></path>
+      </svg>
+    </button>
+  </header>
+
+  <section class="strength-grid" *ngIf="!loading() && !error()" role="region" [attr.aria-label]="translation.translate('market.strengthIndex')" aria-live="polite" aria-atomic="true">
+    <article 
+      *ngFor="let currency of currencyStrengths(); trackBy: trackByCode; let i = index" 
+      class="strength-card"
+      role="article"
+      [attr.aria-label]="translation.translate('market.currencyStrength') + ': ' + currency.name + ' (' + currency.code + ') - ' + translation.translate('market.strength') + ' ' + currency.strength.toFixed(2)"
+    >
+      <div class="strength-header">
+        <div class="currency-info">
+          <div class="currency-code">{{ currency.code }}</div>
+          <div class="currency-name">{{ currency.name }}</div>
+        </div>
+        <div class="strength-badge" [class]="'strength-' + getStrengthColor(currency.strength)" [attr.aria-label]="translation.translate('market.strength') + ': ' + currency.strength.toFixed(2)">
+          <span class="strength-value">{{ currency.strength >= 0 ? '+' : '' }}{{ currency.strength | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="strength-bar-container">
+        <div class="strength-bar" [class]="'bar-' + getStrengthColor(currency.strength)" role="progressbar" [attr.aria-valuenow]="currency.strength" [attr.aria-valuemin]="-10" [attr.aria-valuemax]="10" [attr.aria-label]="translation.translate('market.strengthBar') + ': ' + currency.strength.toFixed(2)">
+          <div 
+            class="strength-fill" 
+            [style.width.%]="getStrengthWidth(currency.strength)"
+          ></div>
+        </div>
+      </div>
+
+      <div class="strength-details" role="group" [attr.aria-label]="translation.translate('market.changeDetails')">
+        <div class="detail-item">
+          <span class="detail-label">{{ translation.translate('market.change24h') }}</span>
+          <span class="detail-value" [class.positive]="currency.change24h >= 0" [class.negative]="currency.change24h < 0" [attr.aria-label]="translation.translate('market.change24h') + ': ' + (currency.change24h >= 0 ? '+' : '') + (currency.change24h | number:'1.2-2') + '%'">
+            {{ currency.change24h >= 0 ? '+' : '' }}{{ currency.change24h | number:'1.2-2' }}%
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ translation.translate('market.change7d') }}</span>
+          <span class="detail-value" [class.positive]="currency.change7d >= 0" [class.negative]="currency.change7d < 0" [attr.aria-label]="translation.translate('market.change7d') + ': ' + (currency.change7d >= 0 ? '+' : '') + (currency.change7d | number:'1.2-2') + '%'">
+            {{ currency.change7d >= 0 ? '+' : '' }}{{ currency.change7d | number:'1.2-2' }}%
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ translation.translate('market.change30d') }}</span>
+          <span class="detail-value" [class.positive]="currency.change30d >= 0" [class.negative]="currency.change30d < 0" [attr.aria-label]="translation.translate('market.change30d') + ': ' + (currency.change30d >= 0 ? '+' : '') + (currency.change30d | number:'1.2-2') + '%'">
+            {{ currency.change30d >= 0 ? '+' : '' }}{{ currency.change30d | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="top-indicators" *ngIf="!loading() && !error()" role="complementary" [attr.aria-label]="translation.translate('market.topIndicators')">
+    <section class="indicator-section" role="region" [attr.aria-label]="translation.translate('market.strongest')">
+      <h2 class="indicator-title">{{ translation.translate('market.strongest') }}</h2>
+      <div class="indicator-list" role="list" [attr.aria-label]="translation.translate('market.strongest')">
+        <div 
+          *ngFor="let currency of strongestCurrencies(); trackBy: trackByCode; let i = index" 
+          class="indicator-item strong"
+          role="listitem"
+          [attr.aria-label]="translation.translate('market.rank') + ' ' + getRank(i) + ': ' + currency.code + ' - ' + translation.translate('market.strength') + ' ' + currency.strength.toFixed(2)"
+        >
+          <span class="indicator-rank" aria-hidden="true">#{{ getRank(i) }}</span>
+          <span class="indicator-code">{{ currency.code }}</span>
+          <span class="indicator-strength">{{ currency.strength | number:'1.2-2' }}</span>
+        </div>
+        <div *ngIf="strongestCurrencies().length === 0" class="empty-indicator" role="status" [attr.aria-label]="translation.translate('market.noStrongCurrencies')">
+          {{ translation.translate('market.noStrongCurrencies') }}
+        </div>
+      </div>
+    </section>
+
+    <section class="indicator-section" role="region" [attr.aria-label]="translation.translate('market.weakest')">
+      <h2 class="indicator-title">{{ translation.translate('market.weakest') }}</h2>
+      <div class="indicator-list" role="list" [attr.aria-label]="translation.translate('market.weakest')">
+        <div 
+          *ngFor="let currency of weakestCurrencies(); trackBy: trackByCode; let i = index" 
+          class="indicator-item weak"
+          role="listitem"
+          [attr.aria-label]="translation.translate('market.rank') + ' ' + getRank(i) + ': ' + currency.code + ' - ' + translation.translate('market.strength') + ' ' + currency.strength.toFixed(2)"
+        >
+          <span class="indicator-rank" aria-hidden="true">#{{ getRank(i) }}</span>
+          <span class="indicator-code">{{ currency.code }}</span>
+          <span class="indicator-strength">{{ currency.strength | number:'1.2-2' }}</span>
+        </div>
+        <div *ngIf="weakestCurrencies().length === 0" class="empty-indicator" role="status" [attr.aria-label]="translation.translate('market.noWeakCurrencies')">
+          {{ translation.translate('market.noWeakCurrencies') }}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()" role="status" aria-live="polite" aria-busy="true" [attr.aria-label]="translation.translate('cards.loading')">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>{{ translation.translate('cards.loading') }}</span>
+  </div>
+
+  <div class="error-state" *ngIf="error() && !loading()" role="alert" aria-live="assertive" aria-atomic="true">
+    <span class="error-message">{{ error() }}</span>
+    <button 
+      class="retry-btn" 
+      (click)="loadMarketData()"
+      type="button"
+      [attr.aria-label]="translation.translate('common.retry')"
+    >
+      {{ translation.translate('common.retry') }}
+    </button>
+  </div>
+</main>

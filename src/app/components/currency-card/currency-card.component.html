@@ -1,0 +1,28 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<article 
+  class="currency-card" 
+  role="article"
+  [attr.aria-label]="translation.translate('rates.currency') + ': ' + sanitizedCurrencyCode()"
+  tabindex="0"
+  (keydown.enter)="$event.preventDefault()"
+  (keydown.space)="$event.preventDefault()"
+>
+  <header class="card-header">
+    <div class="currency-code" [attr.aria-label]="translation.translate('rates.code')">{{ sanitizedCurrencyCode() }}</div>
+    <div class="currency-name" [attr.aria-label]="translation.translate('rates.name')">{{ getCurrencyName() }}</div>
+  </header>
+
+  <section class="card-body" role="region" [attr.aria-label]="translation.translate('converter.exchangeRate')">
+    <div class="rate-value" [attr.aria-label]="translation.translate('rates.rate') + ': ' + (getRate() | number:'1.4-4')">{{ getRate() | number:'1.4-4' }}</div>
+    <div class="rate-label">{{ sanitizedBaseCurrency() }}/{{ sanitizedCurrencyCode() }}</div>
+  </section>
+
+  <footer class="card-footer" *ngIf="hasChange()" role="region" [attr.aria-label]="translation.translate('rates.change24h')">
+    <div class="change" [class.positive]="isPositive()" [class.negative]="!isPositive()" role="status" [attr.aria-label]="translation.translate('rates.change24h') + ': ' + (isPositive() ? '+' : '') + (getChangePercent() | number:'1.2-2') + '%'">
+      <span class="change-icon" aria-hidden="true">{{ isPositive() ? '↑' : '↓' }}</span>
+      <span class="change-value">{{ getChange24h() | number:'1.4-4' }}</span>
+      <span class="change-percent">({{ isPositive() ? '+' : '' }}{{ getChangePercent() | number:'1.2-2' }}%)</span>
+    </div>
+  </footer>
+</article>

@@ -1,0 +1,410 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<main class="chart-container" role="main" [attr.aria-label]="translation.translate('charts.title')">
+  <article class="chart-card">
+    
+    <header class="chart-header">
+      <div class="header-left">
+        <h1 class="chart-title">{{ translation.translate('charts.title') }}</h1>
+        <div class="chart-stats" *ngIf="metrics() && showMetrics()" role="status" aria-live="polite" aria-atomic="true">
+          <span class="stat-item" [class.positive]="metrics()!.changePercent >= 0" [class.negative]="metrics()!.changePercent < 0" [attr.aria-label]="translation.translate('charts.changePercent') + ': ' + (metrics()!.changePercent >= 0 ? '+' : '') + (metrics()!.changePercent | number:'1.2-2') + '%'">
+            {{ metrics()!.changePercent >= 0 ? '+' : '' }}{{ metrics()!.changePercent | number:'1.2-2' }}%
+          </span>
+          <span class="stat-divider" aria-hidden="true">|</span>
+          <span class="stat-item" [attr.aria-label]="translation.translate('charts.periodHigh') + ': ' + (metrics()!.high | number:'1.4-4')">{{ translation.translate('charts.periodHigh') }}: {{ metrics()!.high | number:'1.4-4' }}</span>
+          <span class="stat-divider" aria-hidden="true">|</span>
+          <span class="stat-item" [attr.aria-label]="translation.translate('charts.periodLow') + ': ' + (metrics()!.low | number:'1.4-4')">{{ translation.translate('charts.periodLow') }}: {{ metrics()!.low | number:'1.4-4' }}</span>
+        </div>
+      </div>
+      <nav class="header-actions" aria-label="Chart actions">
+        <button 
+          class="action-button"
+          [class.active]="showSettings()"
+          (click)="showSettings.set(!showSettings())"
+          [attr.aria-label]="translation.translate('charts.settings')"
+          [attr.aria-expanded]="showSettings()"
+          type="button"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+          </svg>
+          {{ translation.translate('charts.settings') }}
+        </button>
+        <div class="export-menu-wrapper">
+          <button 
+            class="action-button" 
+            (click)="showExportMenu.set(!showExportMenu())"
+            [attr.aria-label]="translation.translate('charts.export')"
+            [attr.aria-expanded]="showExportMenu()"
+            [attr.aria-haspopup]="true"
+            type="button"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            {{ translation.translate('charts.export') }}
+          </button>
+          <div class="export-menu" *ngIf="showExportMenu()" role="menu" [attr.aria-label]="translation.translate('charts.exportMenu')">
+            <button (click)="exportChart('png'); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('charts.exportPNG')">{{ translation.translate('charts.exportPNG') }}</button>
+            <button (click)="exportChart('pdf'); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('charts.exportPDF')">{{ translation.translate('charts.exportPDF') }}</button>
+          </div>
+        </div>
+        <button 
+          class="action-button" 
+          (click)="resetZoom()" 
+          [attr.aria-label]="translation.translate('charts.resetZoom')"
+          type="button"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+          </svg>
+          {{ translation.translate('charts.reset') }}
+        </button>
+      </nav>
+    </header>
+
+    <section class="main-controls" aria-label="Chart controls">
+      <div class="control-row">
+        <div class="control-group">
+          <label [attr.for]="'currency-select'">{{ translation.translate('charts.selectCurrency') }}</label>
+          <select 
+            id="currency-select"
+            [ngModel]="selectedCurrency()" 
+            (ngModelChange)="selectedCurrency.set($event)"
+            class="currency-select"
+            [attr.aria-label]="translation.translate('charts.selectCurrency')"
+            [attr.aria-required]="true"
+          >
+            <option *ngFor="let currency of currencies; trackBy: trackByCurrencyCode" [value]="currency.code">
+              {{ currency.code }} - {{ currency.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>{{ translation.translate('charts.chartType') }}</label>
+          <div class="chart-type-buttons" role="group" [attr.aria-label]="translation.translate('charts.chartType')">
+            <button
+              *ngFor="let type of chartTypeOptions"
+              [class.active]="chartType() === type"
+              (click)="setChartType(type)"
+              class="type-button"
+              [attr.aria-pressed]="chartType() === type"
+              type="button"
+              [attr.aria-label]="translation.translate('charts.chartType.' + type)"
+            >
+              {{ translation.translate('charts.chartType.' + type) }}
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>{{ translation.translate('charts.timeRange') }}</label>
+          <div class="time-range-buttons" role="group" [attr.aria-label]="translation.translate('charts.timeRange')">
+            <button 
+              *ngFor="let range of timeRangeOptions"
+              [class.active]="timeRange() === range && !useCustomRange()"
+              (click)="setTimeRange(range)"
+              class="range-button"
+              [attr.aria-pressed]="timeRange() === range && !useCustomRange()"
+              type="button"
+              [attr.aria-label]="translation.translate('charts.timeRange.' + range)"
+            >
+              {{ translation.translate('charts.timeRange.' + range) }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button 
+        class="custom-range-toggle"
+        (click)="useCustomRange.set(!useCustomRange())"
+        [class.active]="useCustomRange()"
+        [attr.aria-pressed]="useCustomRange()"
+        type="button"
+        [attr.aria-label]="useCustomRange() ? translation.translate('charts.usePresetRange') : translation.translate('charts.customDateRange')"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        {{ useCustomRange() ? translation.translate('charts.usePresetRange') : translation.translate('charts.customDateRange') }}
+      </button>
+
+      <div class="custom-range-section" *ngIf="useCustomRange()" role="group" [attr.aria-label]="translation.translate('charts.customDateRange')">
+        <div class="date-inputs">
+          <div class="date-input-group">
+            <label [attr.for]="'start-date'">{{ translation.translate('charts.startDate') }}</label>
+            <input 
+              id="start-date"
+              type="date" 
+              [ngModel]="customDateRange().start"
+              (ngModelChange)="updateCustomDateRangeStart($event)"
+              [max]="getMaxDate()"
+              [min]="getMinDate()"
+              class="date-input"
+              [attr.aria-label]="translation.translate('charts.startDate')"
+              [attr.aria-required]="true"
+            />
+          </div>
+          <div class="date-input-group">
+            <label [attr.for]="'end-date'">{{ translation.translate('charts.endDate') }}</label>
+            <input 
+              id="end-date"
+              type="date" 
+              [ngModel]="customDateRange().end"
+              (ngModelChange)="updateCustomDateRangeEnd($event)"
+              [max]="getMaxDate()"
+              [min]="getMinDate()"
+              class="date-input"
+              [attr.aria-label]="translation.translate('charts.endDate')"
+              [attr.aria-required]="true"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="overlay-section" aria-label="Overlay currencies">
+      <label>{{ translation.translate('charts.compareWith') }} ({{ translation.translate('charts.max5') }})</label>
+      <div class="overlay-chips">
+        <div
+          *ngFor="let code of overlayCurrencies(); trackBy: trackByString"
+          class="overlay-chip"
+        >
+          <span>{{ code }}</span>
+          <button 
+            (click)="toggleOverlayCurrency(code)" 
+            class="remove-btn"
+            [attr.aria-label]="translation.translate('charts.removeCurrency') + ' ' + code"
+            type="button"
+          >×</button>
+        </div>
+        <select
+          *ngIf="overlayCurrencies().length < 5"
+          (change)="toggleOverlayCurrency($any($event.target).value); $any($event.target).value = ''"
+          class="add-overlay-select"
+          [attr.aria-label]="translation.translate('charts.addCurrency')"
+        >
+          <option value="">{{ translation.translate('charts.addCurrency') }}...</option>
+          <option 
+            *ngFor="let currency of currencies; trackBy: trackByCurrencyCode" 
+            [value]="currency.code"
+            [disabled]="currency.code === selectedCurrency() || overlayCurrencies().includes(currency.code)"
+          >
+            {{ currency.code }} - {{ currency.name }}
+          </option>
+        </select>
+      </div>
+    </section>
+
+    <section class="settings-panel" *ngIf="showSettings()" aria-label="Chart settings">
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="chartSettings().showGrid" 
+              (ngModelChange)="updateChartSetting('showGrid', $event)"
+              [attr.aria-label]="translation.translate('charts.showGrid')"
+            />
+            {{ translation.translate('charts.showGrid') }}
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="chartSettings().showLegend" 
+              (ngModelChange)="updateChartSetting('showLegend', $event)"
+              [attr.aria-label]="translation.translate('charts.showLegend')"
+            />
+            {{ translation.translate('charts.showLegend') }}
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="chartSettings().smoothCurves" 
+              (ngModelChange)="updateChartSetting('smoothCurves', $event)"
+              [attr.aria-label]="translation.translate('charts.smoothCurves')"
+            />
+            {{ translation.translate('charts.smoothCurves') }}
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="chartSettings().showPoints" 
+              (ngModelChange)="updateChartSetting('showPoints', $event)"
+              [attr.aria-label]="translation.translate('charts.showDataPoints')"
+            />
+            {{ translation.translate('charts.showDataPoints') }}
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="showMetrics()"
+              (ngModelChange)="showMetrics.set($event)"
+              [attr.aria-label]="translation.translate('charts.showPerformanceMetrics')"
+            />
+            {{ translation.translate('charts.showPerformanceMetrics') }}
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input 
+              type="checkbox" 
+              [ngModel]="showDataTable()"
+              (ngModelChange)="showDataTable.set($event)"
+              [attr.aria-label]="translation.translate('charts.showDataTable')"
+            />
+            {{ translation.translate('charts.showDataTable') }}
+          </label>
+        </div>
+      </div>
+
+      <div class="indicators-section">
+        <h2>{{ translation.translate('charts.technicalIndicators') }}</h2>
+        <div class="indicators-grid">
+          <div class="indicator-group">
+            <label>
+              <input 
+                type="checkbox" 
+                [ngModel]="showMA()"
+                (ngModelChange)="showMA.set($event); triggerDataLoad()"
+                [attr.aria-label]="translation.translate('charts.movingAverage')"
+              />
+              {{ translation.translate('charts.movingAverage') }} (MA)
+            </label>
+            <input 
+              *ngIf="showMA()"
+              type="number" 
+              [ngModel]="maPeriod()"
+              (ngModelChange)="maPeriod.set($event); triggerDataLoad()"
+              min="2"
+              max="100"
+              class="period-input"
+              [attr.aria-label]="translation.translate('charts.maPeriod')"
+            />
+          </div>
+          <div class="indicator-group">
+            <label>
+              <input 
+                type="checkbox" 
+                [ngModel]="showEMA()"
+                (ngModelChange)="showEMA.set($event); triggerDataLoad()"
+                [attr.aria-label]="translation.translate('charts.exponentialMA')"
+              />
+              {{ translation.translate('charts.exponentialMA') }} (EMA)
+            </label>
+            <input 
+              *ngIf="showEMA()"
+              type="number" 
+              [ngModel]="emaPeriod()"
+              (ngModelChange)="emaPeriod.set($event); triggerDataLoad()"
+              min="2"
+              max="100"
+              class="period-input"
+              [attr.aria-label]="translation.translate('charts.emaPeriod')"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics-panel" *ngIf="metrics() && showMetrics()" aria-label="Performance metrics">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.periodHigh') }}</div>
+          <div class="metric-value" [attr.aria-label]="translation.translate('charts.periodHigh') + ': ' + (metrics()!.high | number:'1.4-4')">{{ metrics()!.high | number:'1.4-4' }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.periodLow') }}</div>
+          <div class="metric-value" [attr.aria-label]="translation.translate('charts.periodLow') + ': ' + (metrics()!.low | number:'1.4-4')">{{ metrics()!.low | number:'1.4-4' }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.average') }}</div>
+          <div class="metric-value" [attr.aria-label]="translation.translate('charts.average') + ': ' + (metrics()!.average | number:'1.4-4')">{{ metrics()!.average | number:'1.4-4' }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.change') }}</div>
+          <div class="metric-value" [class.positive]="metrics()!.change >= 0" [class.negative]="metrics()!.change < 0" [attr.aria-label]="translation.translate('charts.change') + ': ' + (metrics()!.change >= 0 ? '+' : '') + (metrics()!.change | number:'1.4-4')">
+            {{ metrics()!.change >= 0 ? '+' : '' }}{{ metrics()!.change | number:'1.4-4' }}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.changePercent') }}</div>
+          <div class="metric-value" [class.positive]="metrics()!.changePercent >= 0" [class.negative]="metrics()!.changePercent < 0" [attr.aria-label]="translation.translate('charts.changePercent') + ': ' + (metrics()!.changePercent >= 0 ? '+' : '') + (metrics()!.changePercent | number:'1.2-2') + '%'">
+            {{ metrics()!.changePercent >= 0 ? '+' : '' }}{{ metrics()!.changePercent | number:'1.2-2' }}%
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.volatility') }}</div>
+          <div class="metric-value" [attr.aria-label]="translation.translate('charts.volatility') + ': ' + (metrics()!.volatility | number:'1.2-2') + '%'">{{ metrics()!.volatility | number:'1.2-2' }}%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{{ translation.translate('charts.trend') }}</div>
+          <div class="metric-value trend-indicator" [class]="'trend-' + metrics()!.trend" [attr.aria-label]="translation.translate('charts.trend') + ': ' + translation.translate('charts.trend.' + metrics()!.trend)">
+            <span class="trend-icon" aria-hidden="true">{{ metrics()!.trend === 'up' ? '📈' : metrics()!.trend === 'down' ? '📉' : '➡️' }}</span>
+            {{ translation.translate('charts.trend.' + metrics()!.trend) }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="chart-wrapper" *ngIf="!loading() && !error()" role="img" [attr.aria-label]="translation.translate('charts.chart')">
+      <canvas id="currencyChart"></canvas>
+    </div>
+
+    <section class="data-table-section" *ngIf="showDataTable() && chartData()" aria-label="Historical data table">
+      <h2>{{ translation.translate('charts.historicalData') }}</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ translation.translate('charts.date') }}</th>
+              <th scope="col">{{ translation.translate('charts.rate') }}</th>
+              <th scope="col">{{ translation.translate('charts.change') }}</th>
+              <th scope="col">{{ translation.translate('charts.changePercent') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of tableData(); trackBy: trackByTableData">
+              <td>{{ formatDateForDisplay(item.date) }}</td>
+              <td>{{ item.rate | number:'1.4-4' }}</td>
+              <td [class.positive]="item.change >= 0" [class.negative]="item.change < 0" [attr.aria-label]="translation.translate('charts.change') + ': ' + (item.change >= 0 ? '+' : '') + (item.change | number:'1.4-4')">
+                {{ item.change >= 0 ? '+' : '' }}{{ item.change | number:'1.4-4' }}
+              </td>
+              <td [class.positive]="item.changePercent >= 0" [class.negative]="item.changePercent < 0" [attr.aria-label]="translation.translate('charts.changePercent') + ': ' + (item.changePercent >= 0 ? '+' : '') + (item.changePercent | number:'1.2-2') + '%'">
+                {{ item.changePercent >= 0 ? '+' : '' }}{{ item.changePercent | number:'1.2-2' }}%
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="loading-state" *ngIf="loading()" role="status" aria-live="polite" aria-busy="true" [attr.aria-label]="translation.translate('cards.loading')">
+      <div class="spinner" aria-hidden="true"></div>
+      <span>{{ translation.translate('cards.loading') }}</span>
+    </div>
+
+    <div class="error-state" *ngIf="error() && !loading()" role="alert" aria-live="assertive">
+      <span class="error-message">{{ error() }}</span>
+      <button class="retry-button" (click)="loadChartData()" type="button" [attr.aria-label]="translation.translate('common.retry')">{{ translation.translate('common.retry') }}</button>
+    </div>
+  </article>
+</main>

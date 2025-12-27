@@ -1,0 +1,117 @@
+/**
+ * Theme Variables
+ * 
+ * @project AuraFX
+ * @author Mohamed Dhaoui
+ * @date 2024-12-26
+ * 
+ * SCSS variables and CSS custom properties for dark and light themes
+ */
+
+// ============================================================================
+// SCSS Variables (for backward compatibility)
+// ============================================================================
+
+// Color Variables
+$primary-color: #6366f1;
+$secondary-color: #a855f7;
+$success-color: #10b981;
+$error-color: #ef4444;
+$warning-color: #f59e0b;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+
+// Border Radius
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 20px;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// ============================================================================
+// CSS Custom Properties (Theme Support)
+// ============================================================================
+
+:root {
+  // Color Variables
+  --primary-color: #{$primary-color};
+  --secondary-color: #{$secondary-color};
+  --success-color: #{$success-color};
+  --error-color: #{$error-color};
+  --warning-color: #{$warning-color};
+
+  // Purple Accent Colors
+  --purple-light: rgba(99, 102, 241, 0.15);
+  --purple-medium: rgba(99, 102, 241, 0.25);
+  --purple-dark: rgba(99, 102, 241, 0.4);
+  --purple-glow: rgba(99, 102, 241, 0.3);
+
+  // Dark Theme (Default)
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #141420;
+  --bg-tertiary: #1a1a2e;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-color-hover: rgba(99, 102, 241, 0.5);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --card-border: 1px solid rgba(99, 102, 241, 0.3);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(99, 102, 241, 0.1);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(99, 102, 241, 0.4), 0 4px 16px rgba(99, 102, 241, 0.2);
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --selection-bg: rgba(99, 102, 241, 0.3);
+}
+
+[data-theme='light'] {
+  // Light Theme
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: rgba(26, 26, 46, 0.7);
+  --text-tertiary: rgba(26, 26, 46, 0.5);
+  --border-color: rgba(26, 26, 46, 0.15);
+  --border-color-hover: rgba(99, 102, 241, 0.6);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(250, 251, 252, 1) 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --card-border: 1px solid rgba(99, 102, 241, 0.35);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(99, 102, 241, 0.25), 0 2px 8px rgba(99, 102, 241, 0.1);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(99, 102, 241, 0.5), 0 4px 16px rgba(99, 102, 241, 0.25);
+  --scrollbar-track: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+  --selection-bg: rgba(99, 102, 241, 0.2);
+}
+
+// ============================================================================
+// SCSS Variable Mappings (for components using SCSS variables)
+// ============================================================================
+
+$bg-primary: var(--bg-primary);
+$bg-secondary: var(--bg-secondary);
+$bg-tertiary: var(--bg-tertiary);
+$text-primary: var(--text-primary);
+$text-secondary: var(--text-secondary);
+$text-tertiary: var(--text-tertiary);
+$border-color: var(--border-color);
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);

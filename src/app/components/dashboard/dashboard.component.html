@@ -1,0 +1,82 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<main class="dashboard-container" role="main" [attr.aria-label]="translation.translate('dashboard.title')">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">{{ translation.translate('dashboard.title') }}</h1>
+      <p class="dashboard-subtitle">{{ translation.translate('dashboard.subtitle') }}</p>
+    </div>
+    <nav class="header-controls" aria-label="Dashboard controls">
+      <div class="base-currency-selector">
+        <label [attr.for]="'base-currency-select'">{{ translation.translate('dashboard.baseCurrency') }}</label>
+        <select 
+          id="base-currency-select"
+          [ngModel]="baseCurrency()" 
+          (ngModelChange)="onBaseCurrencyChange($event)"
+          class="base-select"
+          [attr.aria-label]="translation.translate('dashboard.baseCurrency')"
+          [attr.aria-required]="true"
+        >
+          <option *ngFor="let currency of availableCurrencies(); trackBy: trackByCurrencyCode" [value]="currency.code">
+            {{ currency.code }} - {{ currency.name }}
+          </option>
+        </select>
+      </div>
+      <button 
+        class="refresh-button" 
+        (click)="onRefresh()" 
+        type="button"
+        [attr.aria-label]="translation.translate('common.refresh')"
+        [disabled]="loading()"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M3 21v-5h5"></path>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <div class="last-update" *ngIf="lastUpdate()" role="status" aria-live="polite" aria-atomic="true" [attr.aria-label]="translation.translate('dashboard.lastUpdate') + ': ' + (lastUpdate() | date:'short')">
+    <span>{{ translation.translate('dashboard.lastUpdate') }}: {{ lastUpdate() | date:'short' }}</span>
+  </div>
+
+  <section class="market-stats" *ngIf="!loading() && !error()" role="region" [attr.aria-label]="translation.translate('insights.marketStats')">
+    <article class="stat-card" *ngFor="let stat of marketStatsArray(); trackBy: trackByStatIndex" [attr.aria-label]="translation.translate(stat.label) + ': ' + stat.value">
+      <div class="stat-icon" aria-hidden="true">{{ stat.icon }}</div>
+      <div class="stat-content">
+        <div class="stat-label">{{ translation.translate(stat.label) }}</div>
+        <div class="stat-value" [class]="'stat-' + (stat.color || 'default')" [attr.aria-label]="translation.translate(stat.label) + ': ' + stat.value">{{ stat.value }}</div>
+      </div>
+    </article>
+  </section>
+
+  <app-market-overview *ngIf="!loading() && !error()"></app-market-overview>
+
+  <div class="currency-analytics-grid" *ngIf="!loading() && !error()" role="region" [attr.aria-label]="translation.translate('dashboard.currencyAnalytics')">
+    <app-currency-analytics-card 
+      *ngFor="let currency of currencies(); trackBy: trackByCurrencyCode" 
+      [currency]="currency"
+      [baseCurrency]="baseCurrency()"
+    />
+  </div>
+
+  <div class="loading-state" *ngIf="loading()" role="status" aria-live="polite" aria-busy="true" [attr.aria-label]="translation.translate('cards.loading')">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>{{ translation.translate('cards.loading') }}</span>
+  </div>
+
+  <div class="error-state" *ngIf="error() && !loading()" role="alert" aria-live="assertive" aria-atomic="true">
+    <span class="error-message">{{ error() }}</span>
+    <button 
+      class="retry-button" 
+      (click)="onRetry()"
+      type="button"
+      [attr.aria-label]="translation.translate('common.retry')"
+    >
+      {{ translation.translate('common.retry') }}
+    </button>
+  </div>
+</main>

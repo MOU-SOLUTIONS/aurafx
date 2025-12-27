@@ -1,0 +1,129 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<article 
+  class="analytics-card" 
+  [class.expanded]="isExpanded()"
+  *ngIf="!loading() && !error()" 
+  role="article" 
+  [attr.aria-label]="translation.translate('analytics.cardFor') + ' ' + currency.code"
+  [attr.aria-expanded]="isExpanded()"
+  (click)="toggleExpand()"
+  tabindex="0"
+  (keydown.enter)="toggleExpand()"
+  (keydown.space)="toggleExpand(); $event.preventDefault()"
+>
+  <header class="card-header">
+    <div class="currency-info">
+      <h3 class="currency-code">{{ currency.code }}</h3>
+      <span class="currency-name">{{ currency.name }}</span>
+    </div>
+    <div class="header-right">
+      <div class="trend-indicator" [class]="'trend-' + trend()" [attr.aria-label]="translation.translate('analytics.trend') + ': ' + (trend() | titlecase)">
+        <span class="trend-icon" aria-hidden="true">{{ trend() === 'up' ? '📈' : trend() === 'down' ? '📉' : '➡️' }}</span>
+      </div>
+      <div class="expand-icon" [class.expanded]="isExpanded()" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <section class="current-rate" role="region" [attr.aria-label]="translation.translate('analytics.currentRate')">
+    <div class="rate-value">{{ getRate() | number:'1.4-4' }}</div>
+    <div class="rate-label">{{ baseCurrency }}/{{ currency.code }}</div>
+    <div class="change-badge" [class.positive]="getChange24h() >= 0" [class.negative]="getChange24h() < 0" [attr.aria-label]="translation.translate('analytics.change24h') + ': ' + (getChange24h() >= 0 ? '+' : '') + (getChangePercent() | number:'1.2-2') + '%'">
+      <span>{{ getChange24h() >= 0 ? '+' : '' }}{{ getChangePercent() | number:'1.2-2' }}%</span>
+    </div>
+  </section>
+
+  <div class="details-content" [class.expanded]="isExpanded()">
+    <section class="metrics-grid" role="region" [attr.aria-label]="translation.translate('analytics.metrics')">
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.avg7Days') }}</div>
+        <div class="metric-value">{{ avg7Days() | number:'1.4-4' }}</div>
+        <div class="metric-change" *ngIf="rateVsAvg7Days() !== null" [class.positive]="(rateVsAvg7Days() ?? 0) >= 0" [class.negative]="(rateVsAvg7Days() ?? 0) < 0" [attr.aria-label]="translation.translate('analytics.change') + ': ' + ((rateVsAvg7Days() ?? 0) >= 0 ? '+' : '') + (rateVsAvg7Days() | number:'1.2-2') + '%'">
+          {{ (rateVsAvg7Days() ?? 0) >= 0 ? '+' : '' }}{{ rateVsAvg7Days() | number:'1.2-2' }}%
+        </div>
+      </div>
+
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.avg30Days') }}</div>
+        <div class="metric-value">{{ avg30Days() | number:'1.4-4' }}</div>
+        <div class="metric-change" *ngIf="rateVsAvg30Days() !== null" [class.positive]="(rateVsAvg30Days() ?? 0) >= 0" [class.negative]="(rateVsAvg30Days() ?? 0) < 0" [attr.aria-label]="translation.translate('analytics.change') + ': ' + ((rateVsAvg30Days() ?? 0) >= 0 ? '+' : '') + (rateVsAvg30Days() | number:'1.2-2') + '%'">
+          {{ (rateVsAvg30Days() ?? 0) >= 0 ? '+' : '' }}{{ rateVsAvg30Days() | number:'1.2-2' }}%
+        </div>
+      </div>
+
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.weekHigh') }}</div>
+        <div class="metric-value">{{ weekHigh() | number:'1.4-4' }}</div>
+        <div class="metric-change" *ngIf="currentVsWeekHigh() !== null" [class.positive]="(currentVsWeekHigh() ?? 0) <= 0" [attr.aria-label]="translation.translate('analytics.change') + ': ' + (currentVsWeekHigh() | number:'1.2-2') + '%'">
+          {{ currentVsWeekHigh() | number:'1.2-2' }}%
+        </div>
+      </div>
+
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.weekLow') }}</div>
+        <div class="metric-value">{{ weekLow() | number:'1.4-4' }}</div>
+        <div class="metric-change" *ngIf="currentVsWeekLow() !== null" [class.positive]="(currentVsWeekLow() ?? 0) >= 0" [attr.aria-label]="translation.translate('analytics.change') + ': ' + ((currentVsWeekLow() ?? 0) >= 0 ? '+' : '') + (currentVsWeekLow() | number:'1.2-2') + '%'">
+          {{ (currentVsWeekLow() ?? 0) >= 0 ? '+' : '' }}{{ currentVsWeekLow() | number:'1.2-2' }}%
+        </div>
+      </div>
+
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.monthHigh') }}</div>
+        <div class="metric-value">{{ monthHigh() | number:'1.4-4' }}</div>
+      </div>
+
+      <div class="metric-item">
+        <div class="metric-label">{{ translation.translate('analytics.monthLow') }}</div>
+        <div class="metric-value">{{ monthLow() | number:'1.4-4' }}</div>
+      </div>
+    </section>
+
+    <section class="volatility-section" role="region" [attr.aria-label]="translation.translate('analytics.volatility')">
+      <div class="volatility-header">
+        <span class="volatility-label">{{ translation.translate('analytics.volatility') }}</span>
+        <span class="volatility-badge" [class]="'vol-' + volatilityLevel()" [attr.aria-label]="translation.translate('analytics.volatilityLevel') + ': ' + translation.translate('analytics.volatilityLevel.' + volatilityLevel())">
+          {{ translation.translate('analytics.volatilityLevel.' + volatilityLevel()) }}
+        </span>
+      </div>
+      <div class="volatility-bar" role="progressbar" [attr.aria-valuenow]="volatility()" [attr.aria-valuemin]="0" [attr.aria-valuemax]="10" [attr.aria-label]="translation.translate('analytics.volatility') + ': ' + (volatility() | number:'1.2-2') + '%'">
+        <div class="volatility-fill" [class]="'vol-' + volatilityLevel()" [style.width.%]="getVolatilityWidth()"></div>
+      </div>
+      <div class="volatility-value">{{ volatility() | number:'1.2-2' }}%</div>
+    </section>
+
+    <section class="range-indicator" role="region" [attr.aria-label]="translation.translate('analytics.priceRange')">
+      <div class="range-label">{{ translation.translate('analytics.priceRange7Days') }}</div>
+      <div class="range-bar">
+        <div class="range-track" role="progressbar" [attr.aria-valuenow]="getCurrentPosition()" [attr.aria-valuemin]="0" [attr.aria-valuemax]="100" [attr.aria-label]="translation.translate('analytics.currentPricePosition')">
+          <div class="range-fill" [style.left.%]="0" [style.width.%]="getRangeWidth()"></div>
+          <div class="range-marker" [style.left.%]="getCurrentPosition()" aria-hidden="true"></div>
+        </div>
+        <div class="range-values">
+          <span>{{ weekLow() | number:'1.4-4' }}</span>
+          <span>{{ weekHigh() | number:'1.4-4' }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</article>
+
+<div class="loading-state" *ngIf="loading()" role="status" aria-live="polite" aria-atomic="true">
+  <div class="spinner" aria-hidden="true"></div>
+  <span>{{ translation.translate('cards.loading') }}</span>
+</div>
+
+<div class="error-state" *ngIf="error()" role="alert" aria-live="assertive" aria-atomic="true">
+  <span class="error-message">{{ error() }}</span>
+  <button 
+    class="retry-btn" 
+    (click)="loadAnalytics()"
+    type="button"
+    [attr.aria-label]="translation.translate('common.retry')"
+  >
+    {{ translation.translate('common.retry') }}
+  </button>
+</div>

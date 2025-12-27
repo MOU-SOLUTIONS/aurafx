@@ -1,0 +1,75 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<nav class="navbar" role="navigation" [attr.aria-label]="translation.translate('nav.mainNavigation')">
+  <div class="nav-container">
+    <a routerLink="/" class="nav-logo" [attr.aria-label]="translation.translate('nav.home')">
+      <img src="/assets/AuraFX-Logo.png" [alt]="translation.translate('nav.logoAlt')" class="logo-image" width="40" height="40" loading="eager" />
+      <span class="logo-text">AuraFX</span>
+    </a>
+    
+    <div class="nav-links" role="menubar" [attr.aria-label]="translation.translate('nav.navigationLinks')">
+      <a 
+        routerLink="/" 
+        routerLinkActive="active" 
+        #dashboardRla="routerLinkActive"
+        [routerLinkActiveOptions]="{exact: true}" 
+        class="nav-link"
+        role="menuitem"
+        [attr.aria-current]="dashboardRla.isActive ? 'page' : null"
+        [attr.aria-label]="translation.translate('nav.dashboard')"
+      >
+        {{ dashboardLabel() }}
+      </a>
+      <a 
+        routerLink="/converter" 
+        routerLinkActive="active" 
+        #converterRla="routerLinkActive"
+        class="nav-link"
+        role="menuitem"
+        [attr.aria-current]="converterRla.isActive ? 'page' : null"
+        [attr.aria-label]="translation.translate('nav.converter')"
+      >
+        {{ converterLabel() }}
+      </a>
+      <a 
+        routerLink="/rates" 
+        routerLinkActive="active" 
+        #ratesRla="routerLinkActive"
+        class="nav-link"
+        role="menuitem"
+        [attr.aria-current]="ratesRla.isActive ? 'page' : null"
+        [attr.aria-label]="translation.translate('nav.rates')"
+      >
+        {{ ratesLabel() }}
+      </a>
+      <a 
+        routerLink="/charts" 
+        routerLinkActive="active" 
+        #chartsRla="routerLinkActive"
+        class="nav-link"
+        role="menuitem"
+        [attr.aria-current]="chartsRla.isActive ? 'page' : null"
+        [attr.aria-label]="translation.translate('nav.charts')"
+      >
+        {{ chartsLabel() }}
+      </a>
+    </div>
+
+    <div class="nav-actions" role="group" [attr.aria-label]="translation.translate('nav.actions')">
+      <div class="language-selector">
+        <label [attr.for]="'language-select'" class="sr-only">{{ translation.translate('nav.selectLanguage') }}</label>
+        <select 
+          id="language-select"
+          [ngModel]="currentLanguage()" 
+          (ngModelChange)="changeLanguage($event)"
+          class="language-select"
+          [attr.aria-label]="translation.translate('nav.selectLanguage')"
+        >
+          <option *ngFor="let lang of languages; trackBy: trackByLanguageCode" [value]="lang.code">
+            {{ lang.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+</nav>

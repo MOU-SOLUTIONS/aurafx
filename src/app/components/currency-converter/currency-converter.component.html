@@ -1,0 +1,298 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<main class="converter-container" role="main" [attr.aria-label]="translation.translate('converter.title')">
+  <article class="converter-card">
+    
+    <header class="converter-header">
+      <h1 class="converter-title">{{ translation.translate('converter.title') }}</h1>
+      <nav class="header-actions" aria-label="Converter actions">
+        <button 
+          class="action-button" 
+          [class.active]="showHistorical()"
+          (click)="toggleHistorical()"
+          type="button"
+          [attr.aria-label]="translation.translate('converter.historical')"
+          [attr.aria-pressed]="showHistorical()"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          {{ translation.translate('converter.historical') }}
+        </button>
+        <button 
+          class="action-button" 
+          [class.active]="showMultiple()"
+          (click)="toggleMultiple()"
+          type="button"
+          [attr.aria-label]="translation.translate('converter.multiple')"
+          [attr.aria-pressed]="showMultiple()"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          {{ translation.translate('converter.multiple') }}
+        </button>
+      </nav>
+    </header>
+
+    <section class="historical-selector" *ngIf="showHistorical()" role="region" [attr.aria-label]="translation.translate('converter.selectDate')">
+      <label [attr.for]="'historical-date'">{{ translation.translate('converter.selectDate') }}</label>
+      <input 
+        id="historical-date"
+        type="date" 
+        [value]="historicalDate() || ''"
+        (input)="updateHistoricalDate($any($event.target).value)"
+        [max]="getMaxHistoricalDate()"
+        [min]="getMinHistoricalDate()"
+        class="date-input"
+        [attr.aria-label]="translation.translate('converter.selectDate')"
+        [attr.aria-required]="true"
+      />
+    </section>
+
+    <section class="favorites-section" *ngIf="favoriteCurrencies().length > 0" role="region" [attr.aria-label]="translation.translate('converter.quickSelect')">
+      <label>{{ translation.translate('converter.quickSelect') }}</label>
+      <div class="favorite-chips" role="list">
+        <button
+          *ngFor="let code of favoriteCurrencies(); trackBy: trackByString"
+          (click)="selectFavorite(code, 'from')"
+          [class.active]="fromCurrency() === code"
+          class="favorite-chip"
+          type="button"
+          role="listitem"
+          [attr.aria-label]="translation.translate('converter.selectCurrency') + ' ' + code + ' ' + translation.translate('converter.asFrom')"
+          [attr.aria-pressed]="fromCurrency() === code"
+        >
+          {{ code }}
+        </button>
+      </div>
+    </section>
+    
+    <form class="converter-form" [attr.aria-label]="translation.translate('converter.conversionForm')">
+      <div class="input-group">
+        <label [attr.for]="'from-currency'">{{ translation.translate('converter.from') }}</label>
+        <div class="input-wrapper">
+          <select 
+            id="from-currency"
+            [value]="fromCurrency()"
+            (change)="updateFromCurrency($any($event.target).value)"
+            class="currency-select"
+            [attr.aria-label]="translation.translate('converter.from') + ' ' + translation.translate('converter.currency')"
+            [attr.aria-required]="true"
+          >
+            <option *ngFor="let currency of currencies(); trackBy: trackByCurrencyCode" [value]="currency.code">
+              {{ currency.code }} - {{ currency.name }}
+            </option>
+          </select>
+          <button 
+            class="favorite-btn"
+            [class.favorited]="isFavorite(fromCurrency())"
+            (click)="toggleFavorite(fromCurrency())"
+            type="button"
+            [attr.aria-label]="(isFavorite(fromCurrency()) ? translation.translate('converter.removeFavorite') : translation.translate('converter.addFavorite')) + ' ' + fromCurrency()"
+            [attr.aria-pressed]="isFavorite(fromCurrency())"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button 
+        class="swap-button" 
+        (click)="swapCurrencies()" 
+        type="button"
+        [attr.aria-label]="translation.translate('converter.swapCurrencies')"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </button>
+
+      <div class="input-group">
+        <label [attr.for]="'to-currency'">{{ translation.translate('converter.to') }}</label>
+        <div class="input-wrapper">
+          <select 
+            id="to-currency"
+            [value]="toCurrency()"
+            (change)="updateToCurrency($any($event.target).value)"
+            class="currency-select"
+            [attr.aria-label]="translation.translate('converter.to') + ' ' + translation.translate('converter.currency')"
+            [attr.aria-required]="true"
+          >
+            <option *ngFor="let currency of currencies(); trackBy: trackByCurrencyCode" [value]="currency.code">
+              {{ currency.code }} - {{ currency.name }}
+            </option>
+          </select>
+          <button 
+            class="favorite-btn"
+            [class.favorited]="isFavorite(toCurrency())"
+            (click)="toggleFavorite(toCurrency())"
+            type="button"
+            [attr.aria-label]="(isFavorite(toCurrency()) ? translation.translate('converter.removeFavorite') : translation.translate('converter.addFavorite')) + ' ' + toCurrency()"
+            [attr.aria-pressed]="isFavorite(toCurrency())"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="input-group amount-group">
+        <label [attr.for]="'amount-input'">{{ translation.translate('converter.amount') }}</label>
+        <div class="amount-presets" role="group" [attr.aria-label]="translation.translate('converter.amountPresets')">
+          <button
+            *ngFor="let preset of amountPresets; trackBy: trackByNumber"
+            (click)="setAmountPreset(preset)"
+            [class.active]="amount() === preset"
+            class="preset-button"
+            type="button"
+            [attr.aria-label]="translation.translate('converter.setAmount') + ' ' + (preset | number)"
+            [attr.aria-pressed]="amount() === preset"
+          >
+            {{ preset | number }}
+          </button>
+        </div>
+        <div class="input-wrapper">
+          <input 
+            id="amount-input"
+            type="number" 
+            [value]="amount()"
+            (input)="updateAmount($any($event.target).value)"
+            min="0"
+            step="0.01"
+            class="amount-input"
+            [placeholder]="translation.translate('converter.amountPlaceholder')"
+            [attr.aria-label]="translation.translate('converter.amount')"
+            [attr.aria-required]="true"
+          />
+        </div>
+      </div>
+    </form>
+
+    <section class="rate-display" *ngIf="exchangeRate() !== null && !loading()" role="region" [attr.aria-label]="translation.translate('converter.exchangeRate')" aria-live="polite" aria-atomic="true">
+      <div class="rate-info">
+        <span class="rate-label">{{ translation.translate('converter.exchangeRate') }}:</span>
+        <span class="rate-value" [attr.aria-label]="translation.translate('converter.exchangeRate') + ': 1 ' + fromCurrency() + ' = ' + (exchangeRate() | number:'1.4-4') + ' ' + toCurrency()">1 {{ fromCurrency() }} = {{ exchangeRate() | number:'1.4-4' }} {{ toCurrency() }}</span>
+      </div>
+      <div class="rate-info" *ngIf="inverseRate() !== null">
+        <span class="rate-label">{{ translation.translate('converter.inverseRate') }}:</span>
+        <span class="rate-value" [attr.aria-label]="translation.translate('converter.inverseRate') + ': 1 ' + toCurrency() + ' = ' + (inverseRate() | number:'1.4-4') + ' ' + fromCurrency()">1 {{ toCurrency() }} = {{ inverseRate() | number:'1.4-4' }} {{ fromCurrency() }}</span>
+      </div>
+    </section>
+
+    <section class="result-section" *ngIf="result() !== null && !loading() && !showMultiple()" role="region" [attr.aria-label]="translation.translate('converter.result')" aria-live="polite" aria-atomic="true">
+      <div class="result-label">{{ translation.translate('converter.result') }}</div>
+      <div class="result-value" [attr.aria-label]="translation.translate('converter.result') + ': ' + (result() | number:'1.2-2') + ' ' + toCurrency()">
+        {{ result() | number:'1.2-2' }} {{ toCurrency() }}
+      </div>
+      <button 
+        class="copy-button" 
+        (click)="copyResult()" 
+        type="button"
+        [attr.aria-label]="translation.translate('converter.copyResult')"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        {{ translation.translate('converter.copy') }}
+      </button>
+    </section>
+
+    <section class="multiple-results" *ngIf="showMultiple()" role="region" [attr.aria-label]="translation.translate('converter.multipleConversions')">
+      <div class="multiple-targets-section">
+        <label>{{ translation.translate('converter.convertToMultiple') }}</label>
+        <div class="target-chips" role="list">
+          <div
+            *ngFor="let target of multipleTargets(); trackBy: trackByString"
+            class="target-chip"
+            role="listitem"
+          >
+            <span>{{ target }}</span>
+            <button 
+              (click)="removeTargetCurrency(target)" 
+              class="remove-btn"
+              type="button"
+              [attr.aria-label]="translation.translate('converter.removeCurrency') + ' ' + target"
+            >×</button>
+          </div>
+          <select
+            *ngIf="canAddTarget()"
+            (change)="addTargetCurrency($any($event.target).value); $any($event.target).value = ''"
+            class="add-target-select"
+            [attr.aria-label]="translation.translate('converter.addCurrency')"
+          >
+            <option value="">{{ translation.translate('converter.addCurrencyPlaceholder') }}</option>
+            <option 
+              *ngFor="let currency of currencies(); trackBy: trackByCurrencyCode" 
+              [value]="currency.code"
+              [disabled]="currency.code === fromCurrency() || multipleTargets().includes(currency.code)"
+            >
+              {{ currency.code }} - {{ currency.name }}
+            </option>
+          </select>
+        </div>
+        <button 
+          *ngIf="multipleTargets().length > 0"
+          (click)="convertMultiple()"
+          class="convert-multiple-btn"
+          type="button"
+          [attr.aria-label]="translation.translate('converter.convertAll')"
+        >
+          {{ translation.translate('converter.convertAll') }}
+        </button>
+      </div>
+
+      <div class="results-grid" *ngIf="multipleResults().length > 0" role="list" [attr.aria-label]="translation.translate('converter.multipleResults')">
+        <article *ngFor="let result of multipleResults(); trackBy: trackByResultCurrency" class="result-card" role="listitem" [attr.aria-label]="translation.translate('converter.result') + ': ' + (result.amount | number:'1.2-2') + ' ' + result.currency">
+          <div class="result-currency">{{ result.currency }}</div>
+          <div class="result-amount">{{ result.amount | number:'1.2-2' }}</div>
+          <div class="result-rate">{{ translation.translate('converter.rate') }}: {{ result.rate | number:'1.4-4' }}</div>
+        </article>
+      </div>
+    </section>
+
+    <div class="loading-section" *ngIf="loading()" role="status" aria-live="polite" aria-busy="true" [attr.aria-label]="translation.translate('cards.loading')">
+      <div class="spinner" aria-hidden="true"></div>
+      <span>{{ translation.translate('cards.loading') }}</span>
+    </div>
+
+    <div class="error-section" *ngIf="error()" role="alert" aria-live="assertive" aria-atomic="true">
+      <span class="error-message">{{ error() }}</span>
+    </div>
+  </article>
+
+  <section class="history-card" *ngIf="hasHistory()" role="region" [attr.aria-label]="translation.translate('converter.recentConversions')">
+    <header class="history-header">
+      <h2>{{ translation.translate('converter.recentConversions') }}</h2>
+      <button 
+        class="clear-history-btn" 
+        (click)="clearHistory()"
+        type="button"
+        [attr.aria-label]="translation.translate('converter.clearHistory')"
+      >
+        {{ translation.translate('converter.clear') }}
+      </button>
+    </header>
+    <div class="history-list" role="list">
+      <article *ngFor="let item of conversionHistory().slice(0, 5); trackBy: trackByHistoryDate" class="history-item" role="listitem" [attr.aria-label]="translation.translate('converter.conversion') + ': ' + item.amount + ' ' + item.from + ' ' + translation.translate('converter.to') + ' ' + (item.result | number:'1.2-2') + ' ' + item.to">
+        <div class="history-main">
+          <span class="history-amount">{{ item.amount }} {{ item.from }}</span>
+          <span class="history-arrow" aria-hidden="true">→</span>
+          <span class="history-result">{{ item.result | number:'1.2-2' }} {{ item.to }}</span>
+        </div>
+        <div class="history-meta">
+          <span class="history-rate">{{ translation.translate('converter.rate') }}: {{ item.rate | number:'1.4-4' }}</span>
+          <span class="history-date">{{ item.date | date:'short' }}</span>
+          <span class="history-badge" *ngIf="item.historicalDate" [attr.aria-label]="translation.translate('converter.historical')">{{ translation.translate('converter.historical') }}</span>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

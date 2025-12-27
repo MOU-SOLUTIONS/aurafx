@@ -1,0 +1,502 @@
+<!-- Project: AuraFX | Author: Mohamed Dhaoui | Date: 2024-12-26 -->
+
+<main class="rates-table-container" role="main" [attr.aria-label]="translation.translate('rates.title')">
+  <header class="table-header">
+    <div class="header-left">
+      <h1 class="table-title">{{ translation.translate('rates.title') }}</h1>
+      <div class="stats-badge" role="status" aria-live="polite" aria-atomic="true">
+        <span>{{ filteredCurrencies().length }} {{ translation.translate('rates.currencies') }}</span>
+      </div>
+    </div>
+    <nav class="table-controls" [attr.aria-label]="translation.translate('rates.tableControls')">
+      <div class="view-mode-toggle" role="group" [attr.aria-label]="translation.translate('rates.viewMode')">
+        <button 
+          [class.active]="viewMode() === 'table'"
+          (click)="viewMode.set('table')"
+          class="mode-btn"
+          type="button"
+          [attr.aria-pressed]="viewMode() === 'table'"
+          [attr.aria-label]="translation.translate('rates.viewMode.table')"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+          </svg>
+        </button>
+        <button 
+          [class.active]="viewMode() === 'grid'"
+          (click)="viewMode.set('grid')"
+          class="mode-btn"
+          type="button"
+          [attr.aria-pressed]="viewMode() === 'grid'"
+          [attr.aria-label]="translation.translate('rates.viewMode.grid')"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button 
+          [class.active]="viewMode() === 'cards'"
+          (click)="viewMode.set('cards')"
+          class="mode-btn"
+          type="button"
+          [attr.aria-pressed]="viewMode() === 'cards'"
+          [attr.aria-label]="translation.translate('rates.viewMode.cards')"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          </svg>
+        </button>
+      </div>
+      <div class="search-wrapper">
+        <label [attr.for]="'search-input'" class="sr-only">{{ translation.translate('rates.search') }}</label>
+        <input 
+          id="search-input"
+          type="text" 
+          [ngModel]="searchTerm()"
+          (ngModelChange)="updateSearchTerm($event)"
+          [placeholder]="translation.translate('rates.search')"
+          class="search-input"
+          [attr.aria-label]="translation.translate('rates.search')"
+          autocomplete="off"
+        />
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+      </div>
+      <button 
+        class="action-button"
+        [class.active]="showFilters()"
+        (click)="showFilters.set(!showFilters())"
+        type="button"
+        [attr.aria-pressed]="showFilters()"
+        [attr.aria-label]="translation.translate('rates.filters')"
+        [attr.aria-expanded]="showFilters()"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        {{ translation.translate('rates.filters') }}
+      </button>
+      <div class="export-menu-wrapper">
+        <button 
+          class="action-button"
+          (click)="showExportMenu.set(!showExportMenu())"
+          type="button"
+          [attr.aria-label]="translation.translate('rates.export')"
+          [attr.aria-expanded]="showExportMenu()"
+          [attr.aria-haspopup]="true"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          {{ translation.translate('rates.export') }}
+        </button>
+        <div class="export-menu" *ngIf="showExportMenu()" role="menu" [attr.aria-label]="translation.translate('rates.exportMenu')">
+          <button (click)="exportCSV(); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('rates.exportCSV')">{{ translation.translate('rates.exportCSV') }}</button>
+          <button (click)="exportJSON(); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('rates.exportJSON')">{{ translation.translate('rates.exportJSON') }}</button>
+          <button (click)="printTable(); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('rates.print')">{{ translation.translate('rates.print') }}</button>
+          <button (click)="shareTable(); showExportMenu.set(false)" role="menuitem" type="button" [attr.aria-label]="translation.translate('rates.share')">{{ translation.translate('rates.share') }}</button>
+        </div>
+      </div>
+      <button 
+        class="action-button"
+        [class.active]="showComparison()"
+        (click)="showComparison.set(!showComparison())"
+        type="button"
+        [attr.aria-pressed]="showComparison()"
+        [attr.aria-label]="translation.translate('rates.compare')"
+        [attr.aria-expanded]="showComparison()"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        </svg>
+        {{ translation.translate('rates.compare') }}
+      </button>
+      <button 
+        class="refresh-button" 
+        (click)="loadRates()" 
+        type="button"
+        [attr.aria-label]="translation.translate('common.refresh')"
+        [attr.aria-busy]="loading()"
+        [disabled]="loading()"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M3 21v-5h5"></path>
+        </svg>
+      </button>
+    </nav>
+  </header>
+  <section class="filters-panel" *ngIf="showFilters()" role="region" [attr.aria-label]="translation.translate('rates.advancedFilters')">
+    <div class="filters-header">
+      <h2>{{ translation.translate('rates.advancedFilters') }}</h2>
+      <button class="clear-filters-btn" (click)="clearFilters()" type="button" [attr.aria-label]="translation.translate('rates.clearFilters')">
+        {{ translation.translate('rates.clearFilters') }}
+      </button>
+    </div>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label [attr.for]="'min-change'">{{ translation.translate('rates.minChange') }}</label>
+        <input 
+          id="min-change"
+          type="number" 
+          [ngModel]="filters().minChange"
+          (ngModelChange)="updateFilter('minChange', $event)"
+          [placeholder]="translation.translate('rates.minChangePlaceholder')"
+          step="0.1"
+          class="filter-input"
+          [attr.aria-label]="translation.translate('rates.minChange')"
+        />
+      </div>
+      <div class="filter-group">
+        <label [attr.for]="'max-change'">{{ translation.translate('rates.maxChange') }}</label>
+        <input 
+          id="max-change"
+          type="number" 
+          [ngModel]="filters().maxChange"
+          (ngModelChange)="updateFilter('maxChange', $event)"
+          [placeholder]="translation.translate('rates.maxChangePlaceholder')"
+          step="0.1"
+          class="filter-input"
+          [attr.aria-label]="translation.translate('rates.maxChange')"
+        />
+      </div>
+      <div class="filter-group">
+        <label [attr.for]="'min-rate'">{{ translation.translate('rates.minRate') }}</label>
+        <input 
+          id="min-rate"
+          type="number" 
+          [ngModel]="filters().minRate"
+          (ngModelChange)="updateFilter('minRate', $event)"
+          [placeholder]="translation.translate('rates.minRatePlaceholder')"
+          step="0.0001"
+          class="filter-input"
+          [attr.aria-label]="translation.translate('rates.minRate')"
+        />
+      </div>
+      <div class="filter-group">
+        <label [attr.for]="'max-rate'">{{ translation.translate('rates.maxRate') }}</label>
+        <input 
+          id="max-rate"
+          type="number" 
+          [ngModel]="filters().maxRate"
+          (ngModelChange)="updateFilter('maxRate', $event)"
+          [placeholder]="translation.translate('rates.maxRatePlaceholder')"
+          step="0.0001"
+          class="filter-input"
+          [attr.aria-label]="translation.translate('rates.maxRate')"
+        />
+      </div>
+      <div class="filter-group checkbox-group">
+        <label [attr.for]="'only-gainers'">
+          <input 
+            id="only-gainers"
+            type="checkbox" 
+            [ngModel]="filters().onlyGainers"
+            (ngModelChange)="updateFilter('onlyGainers', $event)"
+            [attr.aria-label]="translation.translate('rates.onlyGainers')"
+          />
+          {{ translation.translate('rates.onlyGainers') }}
+        </label>
+      </div>
+      <div class="filter-group checkbox-group">
+        <label [attr.for]="'only-losers'">
+          <input 
+            id="only-losers"
+            type="checkbox" 
+            [ngModel]="filters().onlyLosers"
+            (ngModelChange)="updateFilter('onlyLosers', $event)"
+            [attr.aria-label]="translation.translate('rates.onlyLosers')"
+          />
+          {{ translation.translate('rates.onlyLosers') }}
+        </label>
+      </div>
+      <div class="filter-group checkbox-group">
+        <label [attr.for]="'favorites-only'">
+          <input 
+            id="favorites-only"
+            type="checkbox" 
+            [ngModel]="filters().favoritesOnly"
+            (ngModelChange)="updateFilter('favoritesOnly', $event)"
+            [attr.aria-label]="translation.translate('rates.favoritesOnly')"
+          />
+          {{ translation.translate('rates.favoritesOnly') }}
+        </label>
+      </div>
+    </div>
+  </section>
+  <nav class="column-controls" [attr.aria-label]="translation.translate('rates.columnVisibility')">
+    <span class="control-label">{{ translation.translate('rates.columns') }}:</span>
+    <button 
+      *ngFor="let col of ['code', 'name', 'rate']; trackBy: trackByString"
+      [class.active]="isColumnVisible(col)"
+      (click)="toggleColumnByString(col)"
+      class="column-toggle"
+      type="button"
+      [attr.aria-pressed]="isColumnVisible(col)"
+      [attr.aria-label]="translation.translate('rates.toggleColumn') + ' ' + col"
+    >
+      {{ col | titlecase }}
+    </button>
+  </nav>
+  <div class="selection-controls" *ngIf="hasSelection()" role="status" aria-live="polite" aria-atomic="true">
+    <span>{{ selectedCurrencies().length }} {{ translation.translate('rates.selected') }}</span>
+    <button class="action-btn-small" (click)="selectedCurrencies.set([])" type="button" [attr.aria-label]="translation.translate('rates.clearSelection')">
+      {{ translation.translate('rates.clear') }}
+    </button>
+    <button class="action-btn-small" (click)="exportCSV()" type="button" [attr.aria-label]="translation.translate('rates.exportSelected')">
+      {{ translation.translate('rates.exportSelected') }}
+    </button>
+  </div>
+  <section class="comparison-panel" *ngIf="showComparison()" role="region" [attr.aria-label]="translation.translate('rates.currencyComparison')">
+    <div class="comparison-header">
+      <h2>{{ translation.translate('rates.currencyComparison') }}</h2>
+      <button (click)="comparisonCurrencies.set([])" class="clear-btn" type="button" [attr.aria-label]="translation.translate('rates.clearComparison')">
+        {{ translation.translate('rates.clear') }}
+      </button>
+    </div>
+    <div class="comparison-list">
+      <div *ngFor="let code of comparisonCurrencies(); trackBy: trackByString" class="comparison-item">
+        <span>{{ code }}</span>
+        <button (click)="removeFromComparison(code)" class="remove-btn" type="button" [attr.aria-label]="translation.translate('rates.removeFromComparison') + ' ' + code">
+          ×
+        </button>
+      </div>
+      <select 
+        *ngIf="comparisonCurrencies().length < 5"
+        (change)="addToComparison($any($event.target).value); $any($event.target).value = ''"
+        class="add-comparison-select"
+        [attr.aria-label]="translation.translate('rates.addToComparison')"
+      >
+        <option value="">{{ translation.translate('rates.addCurrency') }}...</option>
+        <option 
+          *ngFor="let currency of filteredCurrencies(); trackBy: trackByCurrencyCode" 
+          [value]="currency.code"
+          [disabled]="comparisonCurrencies().includes(currency.code)"
+        >
+          {{ currency.code }} - {{ currency.name }}
+        </option>
+      </select>
+    </div>
+    <div class="comparison-table" *ngIf="comparisonCurrencies().length > 0">
+      <table role="table" [attr.aria-label]="translation.translate('rates.comparisonTable')">
+        <thead>
+          <tr>
+            <th scope="col">{{ translation.translate('rates.currency') }}</th>
+            <th scope="col">{{ translation.translate('rates.rate') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let code of comparisonCurrencies(); trackBy: trackByString">
+            <td>{{ code }}</td>
+            <td>{{ getCurrencyByCode(code)?.rate | number:'1.4-4' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="table-wrapper" *ngIf="!loading() && !error() && viewMode() === 'table'">
+    <table class="rates-table" role="table" [attr.aria-label]="translation.translate('rates.exchangeRatesTable')">
+      <thead>
+        <tr>
+          <th class="checkbox-col" scope="col">
+            <label [attr.for]="'select-all'" class="sr-only">{{ translation.translate('rates.selectAll') }}</label>
+            <input 
+              id="select-all"
+              type="checkbox" 
+              [checked]="selectedCurrencies().length === filteredCurrencies().length && filteredCurrencies().length > 0"
+              (change)="toggleSelectAll()"
+              [attr.aria-label]="translation.translate('rates.selectAll')"
+            />
+          </th>
+          <th *ngIf="columnVisibility().code" (click)="sort('code')" class="sortable" scope="col" role="columnheader" [attr.aria-sort]="sortColumn() === 'code' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+            {{ translation.translate('rates.code') }}
+            <span class="sort-icon" *ngIf="sortColumn() === 'code'" aria-hidden="true">
+              {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th *ngIf="columnVisibility().name" scope="col">{{ translation.translate('rates.name') }}</th>
+          <th *ngIf="columnVisibility().rate" (click)="sort('rate')" class="sortable" scope="col" role="columnheader" [attr.aria-sort]="sortColumn() === 'rate' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : 'none'">
+            {{ translation.translate('rates.rate') }}
+            <span class="sort-icon" *ngIf="sortColumn() === 'rate'" aria-hidden="true">
+              {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th class="actions-col" scope="col">{{ translation.translate('rates.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let currency of paginatedCurrencies(); trackBy: trackByCurrencyCode" class="table-row">
+          <td class="checkbox-col">
+            <label [attr.for]="'checkbox-' + currency.code" class="sr-only">{{ translation.translate('rates.select') }} {{ currency.code }}</label>
+            <input 
+              [id]="'checkbox-' + currency.code"
+              type="checkbox" 
+              [checked]="selectedCurrencies().includes(currency.code)"
+              (change)="toggleSelection(currency.code)"
+              [attr.aria-label]="translation.translate('rates.select') + ' ' + currency.code"
+            />
+          </td>
+          <td *ngIf="columnVisibility().code" class="currency-code">{{ currency.code }}</td>
+          <td *ngIf="columnVisibility().name" class="currency-name">{{ currency.name }}</td>
+          <td *ngIf="columnVisibility().rate" class="rate-value">{{ currency.rate | number:'1.4-4' }}</td>
+          <td class="actions-col">
+            <div class="row-actions">
+              <button 
+                class="action-icon-btn"
+                [class.favorited]="isFavorite(currency.code)"
+                (click)="toggleFavorite(currency.code)"
+                type="button"
+                [attr.aria-label]="(isFavorite(currency.code) ? translation.translate('rates.removeFavorite') : translation.translate('rates.addFavorite')) + ' ' + currency.code"
+                [attr.aria-pressed]="isFavorite(currency.code)"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+              <button 
+                class="action-icon-btn"
+                (click)="addToComparison(currency.code)"
+                [disabled]="comparisonCurrencies().includes(currency.code) || comparisonCurrencies().length >= 5"
+                type="button"
+                [attr.aria-label]="translation.translate('rates.addToComparison') + ' ' + currency.code"
+                [attr.aria-disabled]="comparisonCurrencies().includes(currency.code) || comparisonCurrencies().length >= 5"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid-wrapper" *ngIf="!loading() && !error() && viewMode() === 'grid'">
+    <div class="rates-grid" role="list" [attr.aria-label]="translation.translate('rates.exchangeRatesGrid')">
+      <article *ngFor="let currency of paginatedCurrencies(); trackBy: trackByCurrencyCode" class="rate-card" role="listitem">
+        <div class="card-header">
+          <div class="card-code">{{ currency.code }}</div>
+          <button 
+            class="favorite-btn-small"
+            [class.favorited]="isFavorite(currency.code)"
+            (click)="toggleFavorite(currency.code)"
+            type="button"
+            [attr.aria-label]="(isFavorite(currency.code) ? translation.translate('rates.removeFavorite') : translation.translate('rates.addFavorite')) + ' ' + currency.code"
+            [attr.aria-pressed]="isFavorite(currency.code)"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="card-name">{{ currency.name }}</div>
+        <div class="card-rate">{{ currency.rate | number:'1.4-4' }}</div>
+      </article>
+    </div>
+  </div>
+  <div class="cards-wrapper" *ngIf="!loading() && !error() && viewMode() === 'cards'">
+    <div class="rates-cards" role="list" [attr.aria-label]="translation.translate('rates.exchangeRatesCards')">
+      <article *ngFor="let currency of paginatedCurrencies(); trackBy: trackByCurrencyCode" class="rate-card-large" role="listitem">
+        <div class="card-top">
+          <div>
+            <div class="card-code-large">{{ currency.code }}</div>
+            <div class="card-name-large">{{ currency.name }}</div>
+          </div>
+          <button 
+            class="favorite-btn-large"
+            [class.favorited]="isFavorite(currency.code)"
+            (click)="toggleFavorite(currency.code)"
+            type="button"
+            [attr.aria-label]="(isFavorite(currency.code) ? translation.translate('rates.removeFavorite') : translation.translate('rates.addFavorite')) + ' ' + currency.code"
+            [attr.aria-pressed]="isFavorite(currency.code)"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="card-rate-large">{{ currency.rate | number:'1.4-4' }}</div>
+      </article>
+    </div>
+  </div>
+  <nav class="pagination" *ngIf="!loading() && !error() && totalPages() > 1" [attr.aria-label]="translation.translate('rates.pagination')">
+    <div class="pagination-info">
+      <span>{{ translation.translate('rates.page') }} {{ currentPage() }} {{ translation.translate('rates.of') }} {{ totalPages() }}</span>
+      <label [attr.for]="'page-size'" class="sr-only">{{ translation.translate('rates.itemsPerPage') }}</label>
+      <select 
+        id="page-size"
+        [ngModel]="pageSize()" 
+        (ngModelChange)="pageSize.set($event); currentPage.set(1)" 
+        class="page-size-select"
+        [attr.aria-label]="translation.translate('rates.itemsPerPage')"
+      >
+        <option [value]="10">10 {{ translation.translate('rates.perPage') }}</option>
+        <option [value]="25">25 {{ translation.translate('rates.perPage') }}</option>
+        <option [value]="50">50 {{ translation.translate('rates.perPage') }}</option>
+        <option [value]="100">100 {{ translation.translate('rates.perPage') }}</option>
+      </select>
+    </div>
+    <div class="pagination-controls">
+      <button 
+        class="page-btn"
+        (click)="previousPage()"
+        [disabled]="currentPage() === 1"
+        type="button"
+        [attr.aria-label]="translation.translate('rates.previousPage')"
+        [attr.aria-disabled]="currentPage() === 1"
+      >
+        {{ translation.translate('rates.previous') }}
+      </button>
+      <div class="page-numbers" role="list">
+        <button
+          *ngFor="let page of getPageNumbers(); trackBy: trackByPageNumber"
+          [class.active]="page === currentPage()"
+          [disabled]="page === -1"
+          (click)="page !== -1 && goToPage(page)"
+          class="page-number"
+          type="button"
+          role="listitem"
+          [attr.aria-label]="page === -1 ? translation.translate('rates.ellipsis') : (translation.translate('rates.goToPage') + ' ' + page)"
+          [attr.aria-current]="page === currentPage() ? 'page' : null"
+          [attr.aria-disabled]="page === -1"
+        >
+          {{ page === -1 ? '...' : page }}
+        </button>
+      </div>
+      <button 
+        class="page-btn"
+        (click)="nextPage()"
+        [disabled]="currentPage() === totalPages()"
+        type="button"
+        [attr.aria-label]="translation.translate('rates.nextPage')"
+        [attr.aria-disabled]="currentPage() === totalPages()"
+      >
+        {{ translation.translate('rates.next') }}
+      </button>
+    </div>
+  </nav>
+  <div class="loading-state" *ngIf="loading()" role="status" aria-live="polite" aria-busy="true" [attr.aria-label]="translation.translate('cards.loading')">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>{{ translation.translate('cards.loading') }}</span>
+  </div>
+  <div class="error-state" *ngIf="error() && !loading()" role="alert" aria-live="assertive" [attr.aria-label]="translation.translate('common.error')">
+    <span class="error-message">{{ error() }}</span>
+    <button class="retry-button" (click)="loadRates()" type="button" [attr.aria-label]="translation.translate('common.retry')">
+      {{ translation.translate('common.retry') }}
+    </button>
+  </div>
+  <div class="empty-state" *ngIf="!loading() && !error() && filteredCurrencies().length === 0" role="status" aria-live="polite" [attr.aria-label]="translation.translate('rates.noResults')">
+    <span>{{ translation.translate('rates.noResults') }}</span>
+  </div>
+</main>
