@@ -3,10 +3,10 @@
   "framework": "angular",
   "buildCommand": "npm run build",
   "outputDirectory": "dist/AuraFX/browser",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
