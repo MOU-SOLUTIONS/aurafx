@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/AuraFX/browser",
+  "buildCommand": "cd AuraFX && npm run build",
+  "outputDirectory": "AuraFX/dist/AuraFX/browser",
   "rewrites": [
     {
       "source": "/(.*)",
